@@ -1,0 +1,85 @@
+data:
+  atomic_number:
+  - 1
+  - 6
+  - 8
+  r_cut: 5.0
+  test_batch_size: 40
+  testset_filename: /project/wen/mjwen/playground/natip_playground/dataset/md17/20240408/md17_salicylic_test.json
+  train_batch_size: 4
+  trainset_filename: /project/wen/mjwen/playground/natip_playground/dataset/md17/20240408/md17_salicylic_train.json
+  val_batch_size: 40
+  valset_filename: /project/wen/mjwen/playground/natip_playground/dataset/md17/20240408/md17_salicylic_val.json
+ema:
+  beta: 0.999
+  include_online_model: false
+  power: 0.6667
+  update_after_step: 1000
+  update_every: 10
+loss:
+  energy_ratio: 1.0
+  forces_ratio: 1.0
+  normalize: true
+lr_scheduler:
+  class_path: torch.optim.lr_scheduler.ReduceLROnPlateau
+  init_args:
+    factor: 0.8
+    mode: min
+    patience: 200
+    verbose: true
+  monitor: val/mae_f
+metrics:
+  normalize: false
+  type: mae
+model:
+  max_chebyshev_degree: 8
+  max_u: 48
+  max_v: 3
+  num_average_neigh: auto
+  num_layers: 2
+  output_mlp_hidden_layers:
+  - 48
+  - 48
+  radial_mlp_hidden_layers:
+  - 48
+  - 48
+optimizer:
+  class_path: torch.optim.Adam
+  init_args:
+    amsgrad: true
+    lr: 0.01
+    weight_decay: 0.0
+restore_checkpoint: null
+seed_everything: 35
+trainer:
+  accelerator: gpu
+  callbacks:
+  - class_path: lightning.pytorch.callbacks.ModelSummary
+    init_args:
+      max_depth: -1
+  - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+    init_args:
+      logging_interval: null
+  - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+    init_args:
+      mode: min
+      monitor: val_ema/mae_e
+      save_top_k: 3
+      verbose: false
+  - class_path: lightning.pytorch.callbacks.EarlyStopping
+    init_args:
+      mode: min
+      monitor: val_ema/mae_f
+      patience: 800
+      verbose: true
+  check_val_every_n_epoch: 1
+  detect_anomaly: false
+  gradient_clip_val: 1.0
+  inference_mode: false
+  log_every_n_steps: 50
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    init_args:
+      project: 240518_md17_salicylic
+  max_epochs: 10000
+  num_nodes: 1

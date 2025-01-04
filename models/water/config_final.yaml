@@ -1,0 +1,85 @@
+data:
+  atomic_number:
+  - 1
+  - 8
+  r_cut: 5.0
+  test_batch_size: 8
+  testset_filename: /project/wen/mjwen/playground/natip_playground/dataset/water/20240923/test_water.json
+  train_batch_size: 4
+  trainset_filename: /project/wen/mjwen/playground/natip_playground/dataset/water/20240923/train_water.json
+  val_batch_size: 10
+  valset_filename: /project/wen/mjwen/playground/natip_playground/dataset/water/20240923/val_water.json
+default_dtype: float32
+ema:
+  beta: 0.999
+  include_online_model: false
+  power: 0.6667
+  update_after_step: 1000
+  update_every: 10
+loss:
+  energy_ratio: 1.0
+  forces_ratio: 1.0
+  normalize: true
+lr_scheduler:
+  class_path: torch.optim.lr_scheduler.ReduceLROnPlateau
+  init_args:
+    factor: 0.8
+    mode: min
+    patience: 100
+    verbose: true
+  monitor: val/mse_e
+metrics:
+  normalize: true
+  type: mse
+model:
+  max_chebyshev_degree: 8
+  max_u: 32
+  max_v: 2
+  num_average_neigh: auto
+  num_layers: 3
+  output_mlp_hidden_layers:
+  - 32
+  - 32
+  radial_mlp_hidden_layers:
+  - 32
+  - 32
+optimizer:
+  class_path: torch.optim.Adam
+  init_args:
+    amsgrad: true
+    lr: 0.01
+    weight_decay: 0.0
+restore_checkpoint: /project/wen/mjwen/playground/natip_playground/water/20240923-production/job_dir/job_20/240923_water-production/4r9nkh81/checkpoints/epoch=2390-step=855978.ckpt
+seed_everything: 35
+trainer:
+  accelerator: gpu
+  callbacks:
+  - class_path: lightning.pytorch.callbacks.ModelSummary
+    init_args:
+      max_depth: -1
+  - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+    init_args:
+      logging_interval: null
+  - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+    init_args:
+      mode: min
+      monitor: val_ema/mse_e
+      save_top_k: 3
+      verbose: false
+  - class_path: lightning.pytorch.callbacks.EarlyStopping
+    init_args:
+      mode: min
+      monitor: val_ema/mse_e
+      patience: 400
+      verbose: true
+  check_val_every_n_epoch: 1
+  detect_anomaly: false
+  gradient_clip_val: 1.0
+  inference_mode: false
+  log_every_n_steps: 50
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    init_args:
+      project: 240923_water-production
+  max_epochs: 10000
+  num_nodes: 1
